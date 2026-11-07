@@ -5,16 +5,16 @@ displayName: "MC On Mindustry"
 name: "MC-On-Mindustry"
 
 #your name
-author: "You"
+author: "阿仔"
 
 #the fully qualified main class of the mod
 main: "Minecraft_On_Mindustry.Main"
 
 #the mod description as seen in the mod dialog
-description: "MC On Mindustry"
+description: "方块世界：Minecraft 的工具、武器、矿石、树木、生物与红石科技。Erekir 风格峡谷地形、五种生物群系、星球、核心、科技树、仓库、物流系统、兵工厂与雪傀儡/铁傀儡。"
 
 #the mod version
-version: 1.0
+version: 1.4
 
-#the minimum game build required to run this mod
+#the minimum game version required to run this mod
 minGameVersion: 160

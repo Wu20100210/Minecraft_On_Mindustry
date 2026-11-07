@@ -2,52 +2,54 @@ package Minecraft_On_Mindustry
 
 import mindustry.content.UnitTypes
 import mindustry.type.Category
-import mindustry.type.ItemStack.with
+import mindustry.type.ItemStack
 import mindustry.world.blocks.storage.CoreBlock
 
 /**
- * 核心定义（原名：hexing）。
- * 本模组星球的初始核心，同时作为科技树的根节点内容。
+ * 核心：科技树的起点与仓库。
+ * 初级核心 / 中级核心 / 最终核心。
  */
-object Cores{
-    lateinit var chujihexing : CoreBlock
-    lateinit var zhongdaihexing : CoreBlock
-    lateinit var zhongjihexing : CoreBlock
-    fun load(){
-        chujihexing = CoreBlock("chujihexing").apply{
-            requirements(Category.effect, with(Items.tong, 1000, Items.tie, 800))
-            size = 3              // 3x3 大小
-            health = 4000         // 生命值
-            itemCapacity = 4000   // 物品容量
-            unitCapModifier = 8  // 增加的单位上限
+object Cores {
+    lateinit var chujihexing: CoreBlock
+    lateinit var zhongdaihexing: CoreBlock
+    lateinit var zhongjihexing: CoreBlock
+
+    fun load() {
+        chujihexing = CoreBlock("chujihexing").apply {
+            requirements(Category.effect, ItemStack.with(
+                Items.yuanshi, 800, Items.muban, 400
+            ))
+            size = 3
+            health = 4000
+            itemCapacity = 4000
+            unitCapModifier = 8
             unitType = UnitTypes.alpha
-            // 核心专属属性
-            isFirstTier = true    // 标记为第一级核心
-            alwaysUnlocked = true // 确保在科技树中默认解锁（作为起点）
-            //shownPlanets.add(Xingqiu.Xingqiu)
+            isFirstTier = true
+            alwaysUnlocked = true
+            thrusterLength = 24f / 4f
         }
-        zhongdaihexing = CoreBlock("zhongdaihexing").apply{
-            requirements(Category.effect, with(Items.tong, 3000, Items.tie, 3000, Items.jing, 2000))
-
-            unitType = UnitTypes.beta
-            health = 3500
-            itemCapacity = 9000
+        zhongdaihexing = CoreBlock("zhongdaihexing").apply {
+            requirements(Category.effect, ItemStack.with(
+                Items.tong, 2000, Items.tie, 2000, Items.zuanshi, 1000
+            ))
             size = 4
-            thrusterLength = 34/4f
-
+            health = 6000
+            itemCapacity = 9000
             unitCapModifier = 16
+            unitType = UnitTypes.beta
+            thrusterLength = 34f / 4f
             researchCostMultiplier = 0.07f
         }
-        zhongjihexing = CoreBlock("zhongjihexing").apply{
-            requirements(Category.effect, with(Items.tong, 8000, Items.tie, 8000, Items.jing, 5000, Items.zuanshi, 4000))
-
-            unitType = UnitTypes.gamma
-            health = 6000
-            itemCapacity = 13000
+        zhongjihexing = CoreBlock("zhongjihexing").apply {
+            requirements(Category.effect, ItemStack.with(
+                Items.tie, 6000, Items.jin, 4000, Items.zuanshi, 5000, Items.xiajiehejinding, 3000
+            ))
             size = 5
-            thrusterLength = 40/4f
-
+            health = 8000
+            itemCapacity = 15000
             unitCapModifier = 24
+            unitType = UnitTypes.gamma
+            thrusterLength = 40f / 4f
             researchCostMultiplier = 0.11f
         }
     }
