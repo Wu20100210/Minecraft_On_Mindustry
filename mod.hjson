@@ -8,7 +8,7 @@ name: "MC-On-Mindustry"
 author: "You"
 
 #the fully qualified main class of the mod
-main: "MOM.Main"
+main: "MC_On_Mindustry.Main"
 
 #the mod description as seen in the mod dialog
 description: "MC On Mindustry"

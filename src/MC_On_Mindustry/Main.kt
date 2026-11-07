@@ -1,4 +1,4 @@
-package MOM
+package MC_On_Mindustry
 
 import mindustry.mod.*
 

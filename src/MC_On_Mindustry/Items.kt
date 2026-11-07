@@ -1,4 +1,4 @@
-package MOM
+package MC_On_Mindustry
 
 import arc.graphics.Color
 import mindustry.type.Item
