@@ -35,7 +35,6 @@ object Tech {
                 TechTree.node(Machines.gongjiangtai_mu) {
                     TechTree.node(Machines.gongjiangtai_shi) {
                         TechTree.node(Machines.gongjiangtai_tie) {
-                            TechTree.node(Machines.binggongchang) {}
                             TechTree.node(Machines.gongjiangtai_jin) {
                                 TechTree.node(Machines.gongjiangtai_zuanshi) {
                                     TechTree.node(Machines.gongjiangtai_xiajiehejin) {}
@@ -47,6 +46,24 @@ object Tech {
 
                 // 伐木场
                 TechTree.node(Machines.famuchang) {}
+
+                // 红石电力：工作台的直接子分支
+                TechTree.node(Machines.hongshizhongjiqi) {
+                    TechTree.node(Machines.hongshihuoba) {}
+                    TechTree.node(Machines.hongshikuai) {}
+                }
+
+                // 四种生物工厂：工作台的直接子分支
+                TechTree.node(Machines.jishe) {
+                    TechTree.node(Machines.niushe) {
+                        TechTree.node(Machines.yangjuan) {
+                            TechTree.node(Machines.zhujuan) {}
+                        }
+                    }
+                }
+
+                // 兵工厂：工作台的直接子分支
+                TechTree.node(Machines.binggongchang) {}
 
                 // 近战炮台链：木 → 石 → 铁 → 金 → 钻石 → 合金
                 TechTree.node(Weapons.mujianpaotai) {
@@ -72,19 +89,6 @@ object Tech {
                     TechTree.node(Machines.shencengkuangjing) {
                         TechTree.node(Machines.zuanshikuangjing) {
                             TechTree.node(Machines.xiajiekuangjing) {}
-                        }
-                    }
-
-                    // 红石电力与生物工厂（由矿井产出的红石驱动）
-                    TechTree.node(Machines.hongshizhongjiqi) {
-                        TechTree.node(Machines.hongshihuoba) {}
-                        TechTree.node(Machines.hongshikuai) {}
-                        TechTree.node(Machines.jishe) {
-                            TechTree.node(Machines.niushe) {
-                                TechTree.node(Machines.yangjuan) {
-                                    TechTree.node(Machines.zhujuan) {}
-                                }
-                            }
                         }
                     }
                 }
