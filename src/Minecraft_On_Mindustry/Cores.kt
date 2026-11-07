@@ -15,6 +15,15 @@ object Cores {
     lateinit var zhongjihexing: CoreBlock
 
     fun load() {
+        // 允许玩家直接用手采集树木墙（wallDrop = 原木），
+        // 这样即使没有伐木场也能获得原木并加工成木板。
+        UnitTypes.alpha.mineWalls = true
+        UnitTypes.beta.mineWalls = true
+        UnitTypes.gamma.mineWalls = true
+        UnitTypes.alpha.mineRange = 100f
+        UnitTypes.beta.mineRange = 100f
+        UnitTypes.gamma.mineRange = 100f
+
         chujihexing = CoreBlock("chujihexing").apply {
             requirements(Category.effect, ItemStack.with(
                 Items.yuanshi, 800, Items.muban, 400

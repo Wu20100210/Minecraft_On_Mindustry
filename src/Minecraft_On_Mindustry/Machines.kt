@@ -178,11 +178,10 @@ object Machines {
 
         // ---------------------------------------------------------------- 工作台
         gongzuotai = GenericCrafter("gongzuotai").apply {
+            // 只用圆石建造：即使没有任何木材/木板也能先造出工作台
             requirements(Category.crafting, ItemStack.with(
-                Items.yuanmu, 40, Items.yuanshi, 20
+                Items.yuanshi, 40
             ))
-            // 研发花费单独下调：原木 15 + 圆石 20（建造花费不变）
-            researchCost = ItemStack.with(Items.yuanmu, 15, Items.yuanshi, 20)
             size = 2
             craftTime = 60f
             outputItem = ItemStack(Items.muban, 4)
