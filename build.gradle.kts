@@ -8,7 +8,7 @@ buildscript{
         mavenCentral()
     }
 }
-
+//
 // Mindustry version to depend on.
 // Valid values:
 // - latest: depend on the latest release of mindustry
