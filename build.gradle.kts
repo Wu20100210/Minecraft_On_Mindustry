@@ -1,5 +1,7 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.util.Properties
+import java.util.concurrent.TimeUnit
 
 version = "1.0"
 
@@ -16,7 +18,14 @@ buildscript{
 // - v<number>: depend on a specific version
 val mindustryVersion = "v160"
 val kotlinVersion = "2.3.20"
-val sdkRoot: String? = System.getenv("ANDROID_HOME") ?: System.getenv("ANDROID_SDK_ROOT")
+val sdkRoot: String? = System.getenv("ANDROID_HOME")
+    ?: System.getenv("ANDROID_SDK_ROOT")
+    ?: run {
+        val localProps = File(rootDir, "local.properties")
+        if (localProps.exists()) {
+            Properties().apply { localProps.inputStream().use { load(it) } }.getProperty("sdk.dir")
+        } else null
+    }
 val isWindows = System.getProperty("os.name").lowercase().contains("windows")
 val modArtifactName = project.name
 
@@ -31,15 +40,14 @@ sourceSets.main{
 repositories{
     mavenCentral()
 
-    // Downloads the dependencies JAR file from Mindustry releases; does not use any real repository. Surprisingly, this is the most reliable option.
     ivy{
         url = uri("https://github.com/")
         patternLayout{
             artifact(
                 when(mindustryVersion){
-                    "latest" -> "/[organisation]/[module]/releases/[revision]/download/dependencies.jar" // latest stable release
-                    "be" -> "/[organisation]/[module]/releases/download/master/[revision].jar" // latest commit (BE)
-                    else -> "/[organisation]/[module]/releases/download/[revision]/dependencies.jar" // specific release
+                    "latest" -> "/[organisation]/[module]/releases/[revision]/download/dependencies.jar"
+                    "be" -> "/[organisation]/[module]/releases/download/master/[revision].jar"
+                    else -> "/[organisation]/[module]/releases/download/[revision]/dependencies.jar"
                 }
             )
         }
@@ -47,7 +55,6 @@ repositories{
 
         content{
             if(mindustryVersion == "be"){
-                // BE artifact version is always 'latest'
                 includeVersion("Anuken", "MindustryBuilds", "latest")
             }else{
                 includeVersion("Anuken", "Mindustry", mindustryVersion)
@@ -75,6 +82,10 @@ tasks.withType<JavaCompile>().configureEach{
 val jarAndroid = tasks.register("jarAndroid"){
     dependsOn("jar")
 
+    // 声明输出，让 Gradle 能做增量构建
+    val androidJarFile = layout.buildDirectory.file("libs/${modArtifactName}Android.jar")
+    outputs.file(androidJarFile)
+
     doLast{
         if (sdkRoot.isNullOrEmpty() || !File(sdkRoot).exists()){
             throw GradleException("No valid Android SDK found. Ensure that ANDROID_HOME is set to your Android SDK directory.")
@@ -86,22 +97,57 @@ val jarAndroid = tasks.register("jarAndroid"){
             ?.find{ f -> File(f, "android.jar").exists() }
             ?: throw GradleException("No android.jar found. Ensure that you have an Android platform installed.")
 
-        // collect dependencies needed for desugaring
-        val dependencies = (configurations.compileClasspath.get().toList() +
+        val classpathFiles = (configurations.compileClasspath.get().toList() +
                 configurations.runtimeClasspath.get().toList() +
                 listOf(File(platformRoot, "android.jar")))
-            .joinToString(" "){ "--classpath ${it.path}" }
+            .distinct()
 
-        // dex and desugar files - this requires d8 in your PATH
         val d8 = if (isWindows) "d8.bat" else "d8"
 
-        val process = ProcessBuilder(
-            "$d8 $dependencies --min-api 21 --output ${modArtifactName}Android.jar ${modArtifactName}Desktop.jar".split(" "))
-            .directory(File("${layout.buildDirectory.get().asFile}/libs"))
-            .redirectOutput(ProcessBuilder.Redirect.INHERIT)
-            .redirectError(ProcessBuilder.Redirect.INHERIT)
+        // 直接构建参数列表，避免字符串 split 带来的空格/转义问题
+        val args = mutableListOf(d8)
+        classpathFiles.forEach {
+            args += "--classpath"
+            args += it.path
+        }
+        args += listOf(
+            "--min-api", "21",
+            "--output", "${modArtifactName}Android.jar",
+            "${modArtifactName}Desktop.jar"
+        )
+
+        logger.lifecycle("执行 d8: ${args.joinToString(" ")}")
+
+        val process = ProcessBuilder(args)
+            .directory(layout.buildDirectory.dir("libs").get().asFile)
+            .redirectErrorStream(true)
             .start()
-        process.waitFor()
+
+        // 立即关闭子进程 stdin，防止 d8 意外等待输入而挂起
+        process.outputStream.close()
+
+        // 异步读取输出，避免管道缓冲区满导致死锁
+        val output = StringBuilder()
+        val reader = Thread {
+            process.inputStream.bufferedReader().forEachLine { line ->
+                output.appendLine(line)
+                logger.info("[d8] $line")
+            }
+        }
+        reader.start()
+
+        // 带超时的等待
+        val finished = process.waitFor(10, TimeUnit.MINUTES)
+        reader.join(5000)
+
+        if (!finished) {
+            process.destroyForcibly()
+            throw GradleException("d8 执行超时（10 分钟）。已捕获输出：\n$output")
+        }
+        if (process.exitValue() != 0) {
+            throw GradleException("d8 执行失败，退出码 ${process.exitValue()}。输出：\n$output")
+        }
+        logger.lifecycle("d8 执行成功，已生成 Android jar")
     }
 }
 
